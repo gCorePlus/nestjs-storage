@@ -1,6 +1,6 @@
 {
   "name": "@gcoreplus/nestjs-storage",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Provides an injectable storage (S3, GS) client to provide storage access from nestjs modules",
   "author": "Rennan Stefan Boni",
   "main": "./dist/index.js",
@@ -10,6 +10,7 @@
     "README.MD",
     "LICENCE.MD"
   ],
+  "homepage": "https://rennanboni.com/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gCorePlus/nestjs-storage.git"
