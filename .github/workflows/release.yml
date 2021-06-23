@@ -1,4 +1,4 @@
-name: npm bump
+name: release
 
 on:
   workflow_dispatch:
@@ -12,7 +12,7 @@ env:
 
 jobs:
   version_and_release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latestA
     steps:
       - uses: actions/checkout@v2.3.4
         with:
@@ -23,12 +23,21 @@ jobs:
           node-version: ${{ env.node_version }}
           # setting a registry enables the NODE_AUTH_TOKEN env variable where we can set an npm token.  REQUIRED
           registry-url: 'https://registry.npmjs.org'
-      - run: npm install
-      - run: npm run build
+      - name: Install Dependencies
+        run: npm install
+      - name: Build
+        run: npm run build
+#      - name: Tests
 #      - run: npm test
-      - run: git config --global user.email "rennanboni@gmail.com"
-      - run: git config --global user.name "${{ github.actor }}"
-      - run: npm version ${{ github.event.inputs.new_version }}
-      - run: npm run release
+#      - bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}
+      - name: Git Config
+        run: |
+          git checkout package-lock.json
+          git config --global user.email "rennanboni@gmail.com"
+          git config --global user.name "${{ github.actor }}"
+      - name: New Version
+        run: npm version ${{ github.event.inputs.new_version }}
+      - name: Publish Release
+        run: npm run release
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
