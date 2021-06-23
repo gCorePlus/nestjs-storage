@@ -1,10 +1,10 @@
-[![npm version](http://img.shields.io/npm/v/@gcoreplus/nestjs-storage.svg?style=flat)](https://npmjs.org/package/@gCorePlus/nestjs-storage "View this project on npm")
-[![Codecov Coverage](https://codecov.io/gh/gCorePlus/nestjs-storage/branch/master/graph/badge.svg)](https://codecov.io/gh/gCorePlus/nestjs-storage)
+[![npm version](http://img.shields.io/npm/v/@gcoreplus/nestjs-storage.svg?style=flat)](https://npmjs.org/package/@gcoreplus/nestjs-storage "View this project on npm")
+[![Codecov Coverage](https://codecov.io/gh/gcoreplus/nestjs-storage/branch/master/graph/badge.svg)](https://codecov.io/gh/gcoreplus/nestjs-storage)
 [![ISC license](http://img.shields.io/badge/license-ISC-brightgreen.svg)](http://opensource.org/licenses/ISC)
 
 <p align="center">
   <h3 align="center">
-    @gCorePlus/nestjs-storage
+    @gcoreplus/nestjs-storage
   </h3>
 
   <p align="center">
@@ -22,7 +22,7 @@
 
 ## About
 
-`@gCorePlus/nestjs-storage` implements a module, `NSStorageModule`, which when imported into
+`@gcoreplus/nestjs-storage` implements a module, `NSStorageModule`, which when imported into
 your nestjs project provides an S3 and GS client to any class that injects it. This
 lets S3 and GS be worked into your dependency injection workflow without having to
 do any extra work outside of the initial setup.
@@ -31,7 +31,7 @@ do any extra work outside of the initial setup.
 
 1. General
     
-    `npm install --save @gCorePlus/nestjs-storage`
+    `npm install --save @gcoreplus/nestjs-storage`
 
 2. AWS (Optional)
 
@@ -43,11 +43,11 @@ do any extra work outside of the initial setup.
 
 ## Getting Started
 
-The simplest way to use `@gCorePlus/nestjs-storage` is to use `NSStorageModule.forRoot`
+The simplest way to use `@gcoreplus/nestjs-storage` is to use `NSStorageModule.forRoot`
 
 ```typescript
 import { Module } from '@nestjs-common';
-import { NSStorageModule } from '@gCorePlus/nestjs-storage';
+import { NSStorageModule } from '@gcoreplus/nestjs-storage';
 
 @Module({
   imports: [
@@ -69,13 +69,13 @@ import { NSStorageModule } from '@gCorePlus/nestjs-storage';
 export class AppModule {}
 ```
 
-The async way `@gCorePlus/nestjs-storage` is to use `NSStorageModule.forRootAsync`
+The async way `@gcoreplus/nestjs-storage` is to use `NSStorageModule.forRootAsync`
 
 ```typescript
 import { Module } from '@nestjs-common';
-import { NSStorageModule } from '@gCorePlus/nestjs-storage';
-import { ConfigModule } from '@gCorePlus/nestjs-config';
-import { ConfigService } from '@gCorePlus/nestjs-config';
+import { NSStorageModule } from '@gcoreplus/nestjs-storage';
+import { ConfigModule } from '@gcoreplus/nestjs-config';
+import { ConfigService } from '@gcoreplus/nestjs-config';
 
 @Module({
   imports: [
@@ -104,7 +104,7 @@ custom decorator
 
 ```typescript
 import { Injectable } from '@nestjs/common';
-import { NSBody, NSBucket, NSPutObjectRequest, createBucketToken, NSService, NSProvider } from '@gCorePlus/nestjs-storage';
+import { NSBody, NSBucket, NSPutObjectRequest, createBucketToken, NSService, NSProvider } from '@gcoreplus/nestjs-storage';
 
 @Injectable()
 export class AppService {
@@ -141,4 +141,4 @@ Distributed under the ISC License. See `LICENSE` for more information.
 - [aws-sdk](https://github.com/aws/aws-sdk-js)
 - [google-storage](https://github.com/googleapis/nodejs-storage)
 
-Copyright &copy; 2020 gCorePlus Inc.
+Copyright &copy; 2020 gcoreplus Inc.
