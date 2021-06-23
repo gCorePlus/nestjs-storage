@@ -32,7 +32,9 @@
     "test:cov:clean": "rm -rf coverage",
     "test:codecov": "codecov",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "release": "git push --follow-tags && gh-release -y",
+    "release": "git push --follow-tags && npm run publish:npmjs",
+    "public:github": "gh-release -y",
+    "publish:npmjs": "npm publish --access public",
     "version": "npm-run-all version:*",
     "version:changelog": "auto-changelog -p --template keepachangelog auto-changelog --breaking-pattern 'BREAKING CHANGE:' && git add CHANGELOG.md"
   },
