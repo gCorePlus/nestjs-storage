@@ -22,16 +22,19 @@
     }
   ],
   "scripts": {
+    "prebuild": "npm run clean",
     "build": "tsc -p tsconfig.build.json",
     "clean": "rm -rf dist",
     "format": "prettier --write \"lib/**/*.ts\"",
-    "publish:npm": "npm publish --access public",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:cov:clean": "rm -rf coverage",
     "test:codecov": "codecov",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand"
+    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "release": "git push --follow-tags && gh-release -y",
+    "version": "npm-run-all version:*",
+    "version:changelog": "auto-changelog -p --template keepachangelog auto-changelog --breaking-pattern 'BREAKING CHANGE:' && git add CHANGELOG.md"
   },
   "keywords": [
     "nestjs",
@@ -54,8 +57,11 @@
     "@nestjs/testing": "^7.1.3",
     "@types/jest": "^26.0.0",
     "@types/node": "^14.0.13",
+    "auto-changelog": "^2.3.0",
     "codecov": "^3.7.0",
+    "gh-release": "^6.0.0",
     "jest": "^26.0.1",
+    "npm-run-all": "^4.1.5",
     "prettier": "^2.0.5",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^6.5.5",

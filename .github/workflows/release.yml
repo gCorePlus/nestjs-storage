@@ -1,0 +1,34 @@
+name: npm bump
+
+on:
+  workflow_dispatch:
+    inputs:
+      new_version:
+        description: 'npm version (major minor patch)'
+        required: true
+
+env:
+  node_version: 14
+
+jobs:
+  version_and_release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+        with:
+          # fetch full history so things like auto-changelog work properly
+          fetch-depth: 0
+      - uses: actions/setup-node@v2.1.5
+        with:
+          node-version: ${{ env.node_version }}
+          # setting a registry enables the NODE_AUTH_TOKEN env variable where we can set an npm token.  REQUIRED
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm install
+      - run: npm run build
+#      - run: npm test
+      - run: git config --global user.email "rennanboni@gmail.com"
+      - run: git config --global user.name "${{ github.actor }}"
+      - run: npm version ${{ github.event.inputs.new_version }}
+      - run: npm run release
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
