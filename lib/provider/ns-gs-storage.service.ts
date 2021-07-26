@@ -1,32 +1,34 @@
+import { Storage } from "@google-cloud/storage";
+import { CreateBucketRequest, GetBucketsResponse } from "@google-cloud/storage/build/src/storage";
 import {
-  NSConfigOptions,
+  NSBucket,
   NSCreateBucketRequest,
+  NSGSConfigOptions,
   NSListBucketOutput,
   NSListBucketsOutput,
-  NSStorage,
-} from '../interface';
-import { Storage } from '@google-cloud/storage';
-import {
-  CreateBucketRequest,
-  GetBucketsResponse,
-} from '@google-cloud/storage/build/src/storage';
-import { Bucket } from '@google-cloud/storage/build/src/bucket';
+  NSStorage
+} from "../interface";
+import { Bucket } from "@google-cloud/storage/build/src/bucket";
+import { NSGSBucketService } from "./ns-gs-bucket.service";
 
-export class NSGSStorage implements NSStorage {
-  private storage: Storage;
+export class NSGSStorageService implements NSStorage {
 
-  constructor(private readonly config: NSConfigOptions) {
-    this.storage = new Storage(config.gs);
+  private readonly storage: Storage;
+  private readonly nsBuckets: NSGSBucketService[];
+
+  constructor(private readonly config: NSGSConfigOptions) {
+    this.storage = new Storage(config);
+    this.nsBuckets = config.buckets?.map(bucket => new NSGSBucketService(this, bucket)) || [];
   }
 
   createBucket(request: NSCreateBucketRequest): Promise<void> {
     return new Promise((resolve, reject) => {
-      const name = request.Bucket;
+      const name = request.bucket;
 
       let metadata: CreateBucketRequest | undefined;
-      if (request.Location) {
+      if (request.location) {
         metadata = {
-          location: request.Location,
+          location: request.location
         };
       }
 
@@ -58,12 +60,24 @@ export class NSGSStorage implements NSStorage {
           const values: Bucket[] = [].concat.apply([], data);
 
           const items = values.map<NSListBucketOutput>((item) => ({
-            Name: item.name,
+            name: item.name
           }));
 
           resolve(items);
         })
         .catch(reject);
     });
+  }
+
+  getStorage(): Storage {
+    return this.storage;
+  }
+
+  getConfig(): NSGSConfigOptions {
+    return this.config;
+  }
+
+  getNSBuckets(): NSBucket[] {
+    return this.nsBuckets;
   }
 }

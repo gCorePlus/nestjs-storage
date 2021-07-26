@@ -4,20 +4,23 @@ import * as AWS from 'aws-sdk/global';
 import * as https from 'https';
 
 export const setupS3GlobalConfig = (options: NSS3ConfigOptions) => {
-  AWS.config.update({
-    accessKeyId: options.accessKeyId,
-    secretAccessKey: options.secretAccessKey,
-    sessionToken: options.sessionToken,
-    region: options.region,
-  });
 
-  if (options.maxSockets) {
+  if (options.accessKeyId && options.secretAccessKey) {
     AWS.config.update({
-      httpOptions: {
-        agent: new https.Agent({
-          maxSockets: options.maxSockets,
-        }),
-      },
+      accessKeyId: options.accessKeyId,
+      secretAccessKey: options.secretAccessKey,
+      sessionToken: options.sessionToken,
+      region: options.region,
     });
+
+    if (options.maxSockets) {
+      AWS.config.update({
+        httpOptions: {
+          agent: new https.Agent({
+            maxSockets: options.maxSockets,
+          }),
+        },
+      });
+    }
   }
 };

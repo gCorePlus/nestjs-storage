@@ -1,43 +1,42 @@
+import * as S3 from "aws-sdk/clients/s3";
+import { CreateBucketRequest, DeleteBucketRequest, ListBucketsOutput } from "aws-sdk/clients/s3";
 import {
-  NSBucketConfigOptions,
-  NSConfigOptions,
   NSCreateBucketRequest,
   NSListBucketOutput,
   NSListBucketsOutput,
-  NSStorage,
-} from '../interface';
-import * as S3 from 'aws-sdk/clients/s3';
-import {
-  CreateBucketRequest,
-  DeleteBucketRequest,
-  ListBucketsOutput,
-} from 'aws-sdk/clients/s3';
-import { setupS3GlobalConfig } from '../common';
+  NSS3ConfigOptions,
+  NSStorage
+} from "../interface";
+import { setupS3GlobalConfig } from "../common";
+import { NSS3BucketService } from "./ns-s3-bucket.service";
 
-export class NSS3Storage implements NSStorage {
-  private storage: S3;
+export class NSS3StorageService implements NSStorage {
 
-  constructor(private readonly config: NSConfigOptions) {
-    this.storage = new S3(this.config.s3);
+  private readonly storage: S3;
+  private readonly nsBuckets: NSS3BucketService[];
+
+  constructor(private readonly config: NSS3ConfigOptions) {
+    this.storage = new S3(this.config);
+    this.nsBuckets = config.buckets?.map(bucket => new NSS3BucketService(this, bucket)) || [];
   }
 
-  private setConfig() {
-    if (this.config?.s3) {
-      setupS3GlobalConfig(this.config.s3);
+  public setupS3Config() {
+    if (this.config) {
+      setupS3GlobalConfig(this.config);
     }
   }
 
   createBucket(request: NSCreateBucketRequest): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.setConfig();
+      this.setupS3Config();
 
       const params: CreateBucketRequest = {
-        Bucket: request.Bucket,
+        Bucket: request.bucket
       };
 
-      if (request.Location) {
+      if (request.location) {
         params.CreateBucketConfiguration = {
-          LocationConstraint: request.Location,
+          LocationConstraint: request.location
         };
       }
 
@@ -51,10 +50,10 @@ export class NSS3Storage implements NSStorage {
 
   deleteBucket(bucket: string): Promise<any> {
     return new Promise<void>((resolve, reject) => {
-      this.setConfig();
+      this.setupS3Config();
 
       const params: DeleteBucketRequest = {
-        Bucket: bucket,
+        Bucket: bucket
       };
       this.storage.deleteBucket(params, (err, data) => {
         if (err) return reject(err);
@@ -66,7 +65,7 @@ export class NSS3Storage implements NSStorage {
 
   getBuckets(): Promise<NSListBucketsOutput> {
     return new Promise<NSListBucketsOutput>((resolve, reject) => {
-      this.setConfig();
+      this.setupS3Config();
 
       this.storage
         .listBuckets()
@@ -75,12 +74,24 @@ export class NSS3Storage implements NSStorage {
           if (!values) resolve();
 
           const items = values?.Buckets?.map<NSListBucketOutput>((item) => ({
-            Name: item.Name,
+            name: item.Name as string
           }));
 
           resolve(items);
         })
         .catch(reject);
     });
+  }
+
+  getStorage(): S3 {
+    return this.storage;
+  }
+
+  getConfig(): NSS3ConfigOptions {
+    return this.config;
+  }
+
+  getNSBuckets(): NSS3BucketService[] {
+    return this.nsBuckets;
   }
 }

@@ -8,6 +8,10 @@ export interface NSConfigOptions {
   gs?: NSGSConfigOptions;
 }
 
+export interface NSProviderConfigOptions {
+  id?: string;
+}
+
 export interface NSConfigOptionsFactory {
   createConfigOptions(): Promise<NSConfigOptions> | NSConfigOptions;
 }

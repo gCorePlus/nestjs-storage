@@ -1,18 +1,19 @@
 import { Readable } from 'stream';
+import { NSBucketConfigOptions } from "./config/ns-bucket-config-options.interface";
 
 export type NSBody = Buffer | Uint8Array | Blob | string | Readable;
 
 export interface NSPutObjectRequest {
-  Key: string;
-  Body: NSBody;
-  ACL?: string;
-  Metadata?: { [key: string]: string };
+  file: string;
+  body: NSBody;
+  acl?: string;
+  metadata?: { [key: string]: string };
 }
 
 export interface NSCopyObjectRequest {
-  KeySource: string;
-  KeyDestination: string;
-  BucketDestination?: string;
+  keySource: string;
+  keyDestination: string;
+  bucketDestination?: string;
 }
 
 export interface NSBucket {
@@ -20,4 +21,6 @@ export interface NSBucket {
   putObject(data: NSPutObjectRequest): Promise<void>;
   deleteObject(file: string): Promise<void>;
   copyObject(copyObjectRequest: NSCopyObjectRequest): Promise<void>;
+
+  getConfig(): NSBucketConfigOptions;
 }

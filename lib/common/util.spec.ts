@@ -1,73 +1,71 @@
 import {
   appendRemoveBackslash,
-  createBucketToken,
-  createBucketTokenById,
-  createBucketTokenByName,
-  createProviderToken,
-} from './util';
+  createS3BucketToken,
+  createS3StorageToken,
+  createGSBucketToken,
+  createGSStorageToken,
+  createNSServiceToken,
+} from "./util";
 
 describe('util', () => {
-  describe('createProviderToken', () => {
-    it('should return provide name with parameter', () => {
-      const token = createProviderToken({ id: 'gPetPlus' });
-      expect(token).toEqual('gPetPlus.provider');
+
+  describe('createNSServiceToken', () => {
+    it('should return default token', () => {
+      const str = createNSServiceToken();
+      expect(str).toEqual('default.service');
     });
 
-    it('should return provide name with no parameter', () => {
-      const token = createProviderToken();
-      expect(token).toEqual('default.provider');
-    });
-  });
-
-  describe('createBucketToken', () => {
-    it('should return provide name with parameter', () => {
-      const token = createBucketToken('gPetPlus', 'bucket_01');
-      expect(token).toEqual('gPetPlus.bucket_01.bucket');
-    });
-
-    it('should return provide name with no parameter', () => {
-      const token = createBucketToken();
-      expect(token).toEqual('default.undefined.bucket');
+    it('should return id service token', () => {
+      const str = createNSServiceToken('bla');
+      expect(str).toEqual('bla.service');
     });
   });
 
-  describe('createBucketTokenById', () => {
-    it('should return provide name with parameter', () => {
-      const token = createBucketTokenById(
-        { id: 'gPetPlus' },
-        { id: 'bucket_01' },
-      );
-      expect(token).toEqual('gPetPlus.bucket_01.bucket');
+  describe("createS3StorageToken", () => {
+    it("should return provide name with parameter", () => {
+      const token = createS3StorageToken({ id: "gPetPlus" });
+      expect(token).toEqual("aws.gPetPlus.storage");
     });
 
-    it('should return bucket provider name with few parameter', () => {
-      const token = createBucketTokenById({ id: 'gPetPlus' });
-      expect(token).toEqual('gPetPlus.undefined.bucket');
-    });
-
-    it('should return bucket provider name with no parameter', () => {
-      const token = createBucketTokenById();
-      expect(token).toEqual('default.undefined.bucket');
+    it("should return provide name with no parameter", () => {
+      const token = createS3StorageToken();
+      expect(token).toEqual("aws.default.storage");
     });
   });
 
-  describe('createBucketTokenByName', () => {
-    it('should return provide name with parameter', () => {
-      const token = createBucketTokenByName(
-        { id: 'gPetPlus' },
-        { id: 'bucket_01', name: 'bucket_name_01' },
-      );
-      expect(token).toEqual('gPetPlus.bucket_name_01.bucket');
+  describe("createS3BucketToken", () => {
+    it("should return provide name with parameter", () => {
+      const token = createS3BucketToken({ id: "gPetPlus" }, { id: "bucket_01" });
+      expect(token).toEqual("aws.gPetPlus.bucket_01.bucket");
     });
 
-    it('should return bucket provider name with few parameter', () => {
-      const token = createBucketTokenByName({ id: 'gPetPlus' });
-      expect(token).toEqual('gPetPlus.undefined.bucket');
+    it("should return provide name with no parameter", () => {
+      const token = createS3BucketToken();
+      expect(token).toEqual("aws.default.undefined.bucket");
+    });
+  });
+
+  describe("createGSStorageToken", () => {
+    it("should return provide name with parameter", () => {
+      const token = createGSStorageToken({ id: "gPetPlus" });
+      expect(token).toEqual("google.gPetPlus.storage");
     });
 
-    it('should return bucket provider name with no parameter', () => {
-      const token = createBucketTokenByName();
-      expect(token).toEqual('default.undefined.bucket');
+    it("should return provide name with no parameter", () => {
+      const token = createGSStorageToken();
+      expect(token).toEqual("google.default.storage");
+    });
+  });
+
+  describe("createGSBucketToken", () => {
+    it("should return provide name with parameter", () => {
+      const token = createGSBucketToken({ id: "gPetPlus" }, { id: "bucket_01" });
+      expect(token).toEqual("google.gPetPlus.bucket_01.bucket");
+    });
+
+    it("should return provide name with no parameter", () => {
+      const token = createGSBucketToken();
+      expect(token).toEqual("google.default.undefined.bucket");
     });
   });
 

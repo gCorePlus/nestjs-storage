@@ -1,46 +1,44 @@
-import { BUCKET, NS_PROVIDER_TOKEN_DEFAULT, PROVIDER } from './constants';
-import { NSBucketConfigOptions, NSConfigOptions } from '../interface';
+import { BUCKET, DEFAULT, NS_SERVICE, STORAGE } from "./constants";
+import { NSBucketConfigOptions, NSConfigOptions } from "../interface";
 
-export const createProviderToken = (options?: NSConfigOptions): string => {
-  return createProviderTokenById(options?.id);
+export enum ProviderEnum {
+  AWS = 'AWS',
+  GOOGLE = 'GOOGLE'
+}
+
+// export const createNSServiceToken = (options?: NSProviderConfigOptions): string => {
+//   return createProviderTokenById(options?.id);
+// };
+
+export const createNSServiceToken = (value?: string): string => {
+  return `${value || DEFAULT}.${NS_SERVICE}`;
 };
 
-export const createProviderTokenById = (value?: string): string => {
-  return `${value || NS_PROVIDER_TOKEN_DEFAULT}.${PROVIDER}`;
+export const createBucketToken = (provider: ProviderEnum = ProviderEnum.AWS, providerId?: string, bucketId?: string): string => {
+  return `${provider.toLowerCase()}.${providerId || DEFAULT}.${bucketId}.${BUCKET}`;
 };
 
-export const createBucketTokenById = (
-  options?: NSConfigOptions,
-  bucket?: NSBucketConfigOptions,
-): string => {
-  return createBucketToken(options?.id, bucket?.id);
-};
-export const createBucketTokenByName = (
-  options?: NSConfigOptions,
-  bucket?: NSBucketConfigOptions,
-): string => {
-  return createBucketToken(options?.id, bucket?.name);
+export const createS3BucketToken = (storageOptions?: NSConfigOptions, bucketOptions?: NSBucketConfigOptions): string => {
+  return createBucketToken(ProviderEnum.AWS, storageOptions?.id, bucketOptions?.id);
 };
 
-export const createBucketToken = (
-  providerId?: string,
-  bucketName?: string,
-): string => {
-  return `${providerId || NS_PROVIDER_TOKEN_DEFAULT}.${bucketName}.${BUCKET}`;
+export const createGSBucketToken = (storageOptions?: NSConfigOptions, bucketOptions?: NSBucketConfigOptions): string => {
+  return createBucketToken(ProviderEnum.GOOGLE, storageOptions?.id, bucketOptions?.id);
 };
 
-export const createStorageToken = (storage?: string): string => {
-  return `${storage || NS_PROVIDER_TOKEN_DEFAULT}.storage`;
+export const createStorageToken = (provider: ProviderEnum, storageId?: string): string => {
+  return `${provider.toLowerCase()}.${storageId || DEFAULT}.storage`;
 };
 
-export const createStorageTokenById = (options?: NSConfigOptions): string => {
-  return createStorageToken(options?.id);
+export const createS3StorageToken = (storageOptions?: NSConfigOptions): string => {
+  return createStorageToken(ProviderEnum.AWS, storageOptions?.id);
 };
 
-export const appendRemoveBackslash = (
-  str: string | undefined,
-  append: boolean = true,
-): string | undefined => {
+export const createGSStorageToken = (storageOptions?: NSConfigOptions): string => {
+  return createStorageToken(ProviderEnum.GOOGLE, storageOptions?.id);
+};
+
+export const appendRemoveBackslash = (str: string | undefined, append: boolean = true): string | undefined => {
   if (!str) return;
 
   if (append) {
@@ -49,3 +47,11 @@ export const appendRemoveBackslash = (
     return str.charAt(0) == '/' ? str.substr(1) : str;
   }
 };
+
+export const isNSStorage = (name: string): boolean => {
+  return name?.endsWith(STORAGE);
+}
+
+export const isNSBucket = (name: string): boolean => {
+  return name?.endsWith(BUCKET);
+}

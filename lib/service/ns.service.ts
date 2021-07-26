@@ -1,87 +1,43 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from "@nestjs/common";
 
-import { NSBucket, NSConfigOptions, NSStorage } from '../interface';
-import {
-  createBucketTokenById,
-  createBucketTokenByName,
-  createStorageTokenById,
-  NS_CONFIG_OPTIONS,
-} from '../common';
-import { NSGSBucket, NSS3Bucket } from '../provider';
-import { NSS3Storage } from '../provider/ns-s3-storage.service';
-import { NSGSStorage } from '../provider/ns-gs-storage.service';
+import { NSBucket, NSStorage } from "../interface";
 
 @Injectable()
 export class NSService {
-  private readonly storages: Map<string, NSStorage> = new Map<
-    string,
-    NSStorage
-  >();
-  private readonly buckets: Map<string, NSBucket> = new Map<string, NSBucket>();
 
-  constructor(
-    @Inject(NS_CONFIG_OPTIONS) private readonly config: NSConfigOptions,
-  ) {
-    if (config) {
-      if (config.s3) {
-        this.storages.set(
-          createStorageTokenById(config),
-          new NSS3Storage(config),
-        );
+  private storagesMap: Map<string, NSStorage> = new Map<string, NSStorage>();
+  private bucketsMap: Map<string, NSBucket> = new Map<string, NSBucket>();
 
-        config.s3.buckets?.forEach((bucket) => {
-          if (bucket.id) {
-            this.buckets.set(
-              createBucketTokenById(config, bucket),
-              new NSS3Bucket(config, bucket),
-            );
-          }
+  constructor(private storages: NSStorage[], private buckets: NSBucket[]) {
+    if (storages) {
+      storages.forEach(storage => {
+        if (storage.getConfig()?.id) {
+          this.storagesMap.set(<string>storage.getConfig().id, storage);
+        }
+      });
+    }
 
-          if (bucket.name) {
-            this.buckets.set(
-              createBucketTokenByName(config, bucket),
-              new NSS3Bucket(config, bucket),
-            );
-          }
-        });
-      }
-
-      if (config.gs) {
-        this.storages.set(
-          createStorageTokenById(config),
-          new NSGSStorage(config),
-        );
-
-        config.gs.buckets?.forEach((bucket) => {
-          if (bucket.id) {
-            this.buckets.set(
-              createBucketTokenById(config, bucket),
-              new NSGSBucket(config, bucket),
-            );
-          }
-
-          if (bucket.name) {
-            this.buckets.set(
-              createBucketTokenByName(config, bucket),
-              new NSGSBucket(config, bucket),
-            );
-          }
-        });
-      }
+    if (buckets) {
+      buckets.forEach(bucket => {
+        if (bucket.getConfig()?.id) {
+          this.bucketsMap.set(<string>bucket.getConfig().id, bucket);
+        }
+      });
     }
   }
 
   public getNSStorages(): NSStorage[] {
-    return Array.from(this.storages.values());
+    return Array.from(this.storagesMap.values());
   }
+
   public getNSStorageByKey(key: string): NSStorage | undefined {
-    return this.storages.get(key);
+    return this.storagesMap.get(key);
   }
 
   public getNSBuckets(): NSBucket[] {
-    return Array.from(this.buckets.values());
+    return Array.from(this.bucketsMap.values());
   }
   public getNSBucketByKey(key: string): NSBucket | undefined {
-    return this.buckets.get(key);
+    return this.bucketsMap.get(key);
   }
 }

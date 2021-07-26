@@ -1,48 +1,31 @@
-import {
-  NSBody,
-  NSBucket,
-  NSBucketConfigOptions,
-  NSConfigOptions,
-  NSCopyObjectRequest,
-  NSPutObjectRequest,
-} from '../interface';
-import * as AWS from 'aws-sdk/global';
-import * as https from 'https';
-import * as S3 from 'aws-sdk/clients/s3';
-import {
-  CopyObjectRequest,
-  DeleteObjectRequest,
-  GetObjectRequest,
-  PutObjectOutput,
-  PutObjectRequest,
-} from 'aws-sdk/clients/s3';
-import { appendRemoveBackslash, setupS3GlobalConfig } from '../common';
+import { NSBody, NSBucket, NSBucketConfigOptions, NSCopyObjectRequest, NSPutObjectRequest } from "../interface";
+import { CopyObjectRequest, DeleteObjectRequest, GetObjectRequest, PutObjectRequest } from "aws-sdk/clients/s3";
+import { appendRemoveBackslash } from "../common";
+import { PutObjectMapper } from "./ns-s3.mapper";
+import { morphism } from "morphism";
+import { NSS3StorageService } from "./ns-s3-storage.service";
 
-export class NSS3Bucket implements NSBucket {
-  private storage: S3;
+export class NSS3BucketService implements NSBucket {
 
   constructor(
-    private readonly config: NSConfigOptions,
-    private readonly bucketOpts: NSBucketConfigOptions,
+    private readonly storage: NSS3StorageService,
+    private readonly config: NSBucketConfigOptions,
   ) {
-    this.storage = new S3(this.config.s3);
   }
 
   private setConfig() {
-    if (this.config?.s3) {
-      setupS3GlobalConfig(this.config.s3);
-    }
+    this.storage.setupS3Config();
   }
 
   getObject(file: string): Promise<NSBody> {
     this.setConfig();
 
     const params: GetObjectRequest = {
-      Bucket: this.bucketOpts.id,
+      Bucket: this.config.id,
       Key: file,
     };
     return new Promise<any>((resolve, reject) => {
-      this.storage.getObject(params, (err, data) => {
+      this.storage.getStorage().getObject(params, (err, data) => {
         if (err) return reject(err);
 
         resolve(data.Body);
@@ -53,13 +36,12 @@ export class NSS3Bucket implements NSBucket {
   putObject(data: NSPutObjectRequest): Promise<void> {
     this.setConfig();
 
-    const params: PutObjectRequest = Object.assign({}, data, {
-      Bucket: this.bucketOpts.id,
+    const params: PutObjectRequest = Object.assign(morphism(PutObjectMapper, data), {
+      Bucket: this.config.id,
     });
     return new Promise<void>((resolve, reject) => {
-      this.storage.putObject(params, (err, data) => {
+      this.storage.getStorage().putObject(params, (err, data) => {
         if (err) return reject(err);
-
         resolve();
       });
     });
@@ -69,11 +51,11 @@ export class NSS3Bucket implements NSBucket {
     this.setConfig();
 
     const params: DeleteObjectRequest = {
-      Bucket: this.bucketOpts.id,
+      Bucket: this.config.id,
       Key: file,
     };
     return new Promise<void>((resolve, reject) => {
-      this.storage.deleteObject(params, (err, data) => {
+      this.storage.getStorage().deleteObject(params, (err, data) => {
         if (err) return reject(err);
 
         resolve();
@@ -85,17 +67,17 @@ export class NSS3Bucket implements NSBucket {
     this.setConfig();
 
     return new Promise<void>((resolve, reject) => {
-      const bucketSource: string = this.bucketOpts.id;
+      const bucketSource: string = this.config.id;
       const fileSource: string = appendRemoveBackslash(
-        request.KeySource,
+        request.keySource,
         false,
       )!;
 
-      const bucketDestination: string = request.BucketDestination
-        ? request.BucketDestination
-        : this.bucketOpts.id;
+      const bucketDestination: string = request.bucketDestination
+        ? request.bucketDestination
+        : this.config.id;
       const fileDestination: string = appendRemoveBackslash(
-        request.KeyDestination,
+        request.keyDestination,
         false,
       )!;
 
@@ -106,11 +88,15 @@ export class NSS3Bucket implements NSBucket {
       };
       // this.storage.copyObject(params).promise()
 
-      this.storage.copyObject(params, (err, data) => {
+      this.storage.getStorage().copyObject(params, (err, data) => {
         if (err) reject(err);
 
         resolve();
       });
     });
+  }
+
+  getConfig(): NSBucketConfigOptions {
+    return this.config;
   }
 }

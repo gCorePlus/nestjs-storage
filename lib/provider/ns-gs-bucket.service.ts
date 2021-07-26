@@ -1,24 +1,17 @@
-import {
-  NSBucket,
-  NSBucketConfigOptions,
-  NSConfigOptions,
-  NSBody,
-  NSPutObjectRequest,
-  NSCopyObjectRequest,
-} from '../interface';
-import { Bucket, Storage } from '@google-cloud/storage';
-import { File } from '@google-cloud/storage/build/src/file';
+import { NSBody, NSBucket, NSBucketConfigOptions, NSCopyObjectRequest, NSPutObjectRequest } from "../interface";
+import { Bucket } from "@google-cloud/storage";
+import { File } from "@google-cloud/storage/build/src/file";
+import { NSGSStorageService } from "./ns-gs-storage.service";
 
-export class NSGSBucket implements NSBucket {
-  private storage: Storage;
-  private bucket: Bucket;
+export class NSGSBucketService implements NSBucket {
+
+  private readonly bucket: Bucket;
 
   constructor(
-    private readonly config: NSConfigOptions,
-    private readonly bucketOpts: NSBucketConfigOptions,
+    private readonly storage: NSGSStorageService,
+    private readonly config: NSBucketConfigOptions,
   ) {
-    this.storage = new Storage(config.gs);
-    this.bucket = this.storage.bucket(this.bucketOpts.id);
+    this.bucket = this.storage.getStorage().bucket(this.config.id);
   }
 
   public getObject(file: string): Promise<NSBody> {
@@ -33,7 +26,7 @@ export class NSGSBucket implements NSBucket {
 
   putObject(data: NSPutObjectRequest): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      const file: File = this.bucket.file(data.Key);
+      const file: File = this.bucket.file(data.file);
       const stream = file.createWriteStream();
 
       stream.on('error', reject);
@@ -42,7 +35,7 @@ export class NSGSBucket implements NSBucket {
         resolve();
       });
 
-      stream.end(data.Body);
+      stream.end(data.body);
     });
   }
 
@@ -57,19 +50,23 @@ export class NSGSBucket implements NSBucket {
   }
 
   copyObject(request: NSCopyObjectRequest): Promise<void> {
-    const bucketDestination: Bucket = request.BucketDestination
-      ? this.storage.bucket(request.BucketDestination)
+    const bucketDestination: Bucket = request.bucketDestination
+      ? this.storage.getStorage().bucket(request.bucketDestination)
       : this.bucket;
     const fileDestination: File = bucketDestination.file(
-      request.KeyDestination,
+      request.keyDestination,
     );
 
     return new Promise((resolve, reject) => {
       this.bucket
-        .file(request.KeySource)
+        .file(request.keySource)
         .copy(fileDestination)
         .then(() => resolve())
         .catch(reject);
     });
+  }
+
+  getConfig(): NSBucketConfigOptions {
+    return this.config;
   }
 }
